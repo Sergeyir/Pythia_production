@@ -4,7 +4,7 @@ name=$1
 
 number_of_cores=$2
 	
-rm output/*.log
+rm logs/*.log
 
 make ${name} && for i in $(seq 1 ${number_of_cores})
 
