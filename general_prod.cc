@@ -5,7 +5,7 @@ using namespace Pythia8;
 
 
 
-int main(const int argc, const char *num[]) {
+int main(const unsigned int argc, const char *num[]) {
 
 	std::cout << "This is the process " << num[1] << std::endl;
 	
@@ -13,7 +13,7 @@ int main(const int argc, const char *num[]) {
 	set_seed += num[1];
 	
 	Pythia pythia;
-	pythia.readString("Beams:eCM = 200.");
+	pythia.readString("Beams:eCM = 20000.");
 	pythia.readString("Beams:idA = 1000290630");
 	pythia.readString("Beams:idA = 1000791970");
 	pythia.readString("HardQCD:all = on");
@@ -69,7 +69,7 @@ int main(const int argc, const char *num[]) {
 				py = pythia.event[ipart].py();
 				pz = pythia.event[ipart].pz();
 				
-				if (id < 0 && id != 2212) {id = -321};
+				if (id < 0 && id != 2212) {id = -321;};
 				
 				CC->AddParticle(id, iEvent, e, px, py, pz);
 				
