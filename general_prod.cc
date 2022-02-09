@@ -3,8 +3,6 @@
 
 using namespace Pythia8;
 
-
-
 int main(const unsigned int argc, const char *num[]) {
 
 	std::cout << "This is the process " << num[1] << std::endl;
