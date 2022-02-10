@@ -53,8 +53,15 @@ $(PYTHIA):
 	$(error Error: PYTHIA must be built, please run "make"\
                 in the top PYTHIA directory)
 
-# Examples without external dependencies.
 general_prod: $(PYTHIA) general_prod.cc
+ifeq ($(ROOT_USE),true)
+	$(CXX) $@.cc -o $@ -w $(CXX_COMMON) $(ROOT_LIB)\
+	 `$(ROOT_CONFIG) --cflags --glibs`
+else
+	$(error Error: $@ requires ROOT)
+endif
+
+centr: $(PYTHIA) centr.cc
 ifeq ($(ROOT_USE),true)
 	$(CXX) $@.cc -o $@ -w $(CXX_COMMON) $(ROOT_LIB)\
 	 `$(ROOT_CONFIG) --cflags --glibs`
@@ -65,5 +72,7 @@ endif
 # Clean.
 clean:
 	rm -f general_prod;|\
+	rm -f centr;|\
 	rm -f *~; rm -f \#*; rm -f core*; rm -f *Dct.*; rm -f *.so;\
 	rm -f *.log;
+

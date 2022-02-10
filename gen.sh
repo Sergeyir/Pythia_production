@@ -12,6 +12,7 @@ do
 
 	echo "Doing task ${i}"
 
-	./${name} ${i} &> logs/gp_${name}_${i}.log & disown
+	./${name} ${i} &> log/gp_${name}_${i}.log & disown
 
 done
+

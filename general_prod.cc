@@ -11,7 +11,7 @@ int main(const unsigned int argc, const char *num[]) {
 	set_seed += num[1];
 	
 	Pythia pythia;
-	pythia.readString("Beams:eCM = 20000.");
+	pythia.readString("Beams:eCM = 200.");
 	pythia.readString("Beams:idA = 1000290630");
 	pythia.readString("Beams:idA = 1000791970");
 	pythia.readString("HardQCD:all = on");
@@ -96,3 +96,4 @@ int main(const unsigned int argc, const char *num[]) {
 	return 0;
 	
 }
+
