@@ -9,13 +9,16 @@ class Particles {
 	
 	std::vector <int> p_id, pbar_id;
 	std::vector <unsigned int> p_iEvent, pbar_iEvent;
-	std::vector <double> p_e, p_px, p_py, p_pz, pbar_e, pbar_px, pbar_py, pbar_pz;
+	std::vector <double> p_e, p_px, p_py, p_pz, pbar_e, pbar_px, pbar_py, pbar_pz, p_eta, p_centr;
+	std::vector <unsigned int> event_centr, event_iEvent;
+	
+	std::array <const unsigned int, 5> centr_det{200, 69, 26, 5, 1}
 	
 	public:
 	
 	Particles() {	}
 	
-	void AddParticle(const int id, const unsigned int iEvent, const double e, const double px, const double py, const double pz) {
+	void AddParticle(const int id, const unsigned int iEvent, const double e, const double px, const double py, const double pz, const double eta) {
 		
 		if (id > 0) {
 		
@@ -25,6 +28,7 @@ class Particles {
 			p_px.push_back(px);
 			p_py.push_back(py);
 			p_pz.push_back(pz);
+			p_eta.push_back(eta);
 		
 		}
 		
@@ -36,11 +40,28 @@ class Particles {
 			pbar_px.push_back(px);
 			pbar_py.push_back(py);
 			pbar_pz.push_back(pz);
+			pbar_eta.push_back(eta);
 			
 		}
 		
 		return;
 		
 	}
+	
+	void SetCentrality(const int iEvent, const int ncharged) {
+		
+		unsigned int centr = 0;
+		
+		for (int count = 0; count < centr_det.size() - 1; count++) {
+		
+			if (ncharged > centr_det[count] && ncharged < centr_det[count+1]) centr = count;
+		
+		}
+		
+		event_centr.push_back(centr);
+		event_iEvent.push_back(iEvent);
+	
+	}
 
 };
+

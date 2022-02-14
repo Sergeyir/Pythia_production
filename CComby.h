@@ -19,7 +19,17 @@ class CComby: public Particles {
 		TFile *output;
 		
 		std::vector <unsigned int> channels;
-	
+		
+		unsigned const int centr_num = 5, eta_num = 9;
+		
+		unsigned int hist_num = centr_num*eta_num*ch_number;
+		
+		std::array <unsigned const int, centr_num> centr_range_low{0, 20, 40, 60, 80};
+		std::array <unsigned const int, centr_num> centr_range_high{20, 40, 60, 80, 93};
+		
+		std::array <const float, pt_num> eta_range_low{3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9};
+		std::array <const float, pt_num> eta_range_high{3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.};
+		
 		std::array <const int, ch_number> pos_part_id{211, 211, 321, 321, 321, 2212, 2212, 211, 2212};
 		std::array <const int, ch_number> neg_part_id{-211, -321, -211, -321, -2212, -321, -2212, -2212, -211};
 	
@@ -28,8 +38,8 @@ class CComby: public Particles {
 		std::array <const std::string, ch_number> bg_hists_names{"PiPibar_BG", "PiKbar_BG", "KPibar_BG", "KKbar_BG", "KPbar_BG", "PKbar_BG", "PPbar_BG", "PiPbar_BG", "PPibar_BG"};
 		std::array <const std::string, ch_number> fg_hists_names{"PiPibar_FG", "PiKbar_FG", "KPibar_FG", "KKbar_FG", "KPbar_FG", "PKbar_FG", "PPbar_FG", "PiPbar_FG", "PPibar_FG"};
 	
-		std::array <TH2F*, ch_number> fg_hists;
-		std::array <TH2F*, ch_number> bg_hists;
+		std::array <TH2F*, ch_number> hist_num;
+		std::array <TH2F*, ch_number> hist_num;
 		
 		void ClearParticles() {
 		
@@ -119,6 +129,8 @@ class CComby: public Particles {
 			
 			channels.push_back(ch_num);
 			
+			
+			
 			fg_hists[ch_num] = new TH2F(fg_hists_names[ch_num].c_str(), fg_hists_names[ch_num].c_str(), 80, 0, 8, 4000, 0, 4);
 			bg_hists[ch_num] = new TH2F(bg_hists_names[ch_num].c_str(), bg_hists_names[ch_num].c_str(), 80, 0, 8, 4000, 0, 4);
 		
@@ -182,3 +194,4 @@ class CComby: public Particles {
 		}
 		
 };
+

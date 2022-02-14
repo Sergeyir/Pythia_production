@@ -13,7 +13,7 @@ int main(const unsigned int argc, const char *num[]) {
 	Pythia pythia;
 	pythia.readString("Beams:eCM = 200.");
 	pythia.readString("Beams:idA = 1000290630");
-	pythia.readString("Beams:idA = 1000791970");
+	pythia.readString("Beams:idB = 1000791970");
 	pythia.readString("HardQCD:all = on");
 	pythia.readString("Random:setSeed = on");
 	pythia.readString(set_seed.c_str());
@@ -42,7 +42,8 @@ int main(const unsigned int argc, const char *num[]) {
 			name.append(to_string(static_cast<double>(iEvent)/cc_size));
 			name.append(".root");
 			
-			CC->AddChannel(5);
+			CC->AddChannel(1);
+			CC->AddChannel(2);
 			
 			CC->SetOutput(name.c_str());
 				
@@ -51,28 +52,36 @@ int main(const unsigned int argc, const char *num[]) {
 		
 		if (!pythia.next()) continue;
 		
+		unsigned int ncharged = 0;
+		
 		for (int ipart = 0; ipart < pythia.event.size(); ++ipart) {
 		
 			if (pythia.event[ipart].isFinal() && pythia.event[ipart].isCharged()) {
 			
-				int id;
+				double eta = pythia.event[ipart].eta();
+				
+				if (eta < 3.1 && eta > 4) continue;
+			
+				int id, centr;
 				double e, px, py, pz;
 				
 				id = pythia.event[ipart].id();
 				
-				if (abs(id) != 211 && abs(id) != 321 && abs(id) != 2212) continue;
+				if (abs(id) != 211 && abs(id) != 321 && abs(id) != 2212) continue; //pi, K, P
 				
 				e = pythia.event[ipart].e();
 				px = pythia.event[ipart].px();
 				py = pythia.event[ipart].py();
 				pz = pythia.event[ipart].pz();
 				
-				if (id < 0 && id != 2212) {id = -321;};
-				
 				CC->AddParticle(id, iEvent, e, px, py, pz);
+				
+				ncharged++;
 				
 			}
 		}
+		
+		CC->SetCentrality(iEvent, ncharged);
 		
 		if (iEvent % mix_num == 0 && iEvent != 0 || iEvent == nEvents - 1) {
 			

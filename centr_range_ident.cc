@@ -1,84 +1,82 @@
-#include "Pythia8/Pythia.h"
-#include "Pythia8/HeavyIons.h"
-
 #include <iostream>
-#include <TH1.h>
-#include <TFile.h>
+#include <array>
+#include "TH1.h"
+#include "TFile.h"
+#include "TCanvas.h"
 
-using namespace Pythia8;
+int centr_range_ident() {
 
-int main(const unsigned int argc, const char *num[]) {
+	system("echo 'bruh'");
 
-	TH1D *ncharged_per_event_hist, *ncharged_per_event_hist_no_weight_i_said_you_bro_no_weight_at_all_believe_me_please_i_am_not_joking_can_you_trust_me_at_least_one_time_bro_please_can_you_believe_i_ve_got_ligma;
-	TFile *output;
-
-	std::cout << "This is the process " << num[1] << std::endl;
+	TH1D *ncharged_per_event_hist, *zero_ev_hist;
+	std::array<TH1D*, 5> centr_ncharged;
 	
-	std::string set_seed("Random:seed = ");
-	set_seed += num[1];
+	std::array<int, 5> centr_l_range = {0, 20, 40, 60, 80};
+	std::array<int, 5> centr_h_range = {20, 40, 60, 80, 93};
 	
-	Pythia pythia;
+	TFile *input, *output;
 	
-	pythia.readString("Beams:idA = 1000290630");
-	pythia.readString("Beams:idB = 1000791970");
+	std::string name = "/home/sergey/pythia/pythia8306/pythia_production/output/pythiaCuAu200_centr_1_.root";
 	
-	pythia.readString("Beams:eCM = 200.");
-	pythia.readString("Beams:frameType = 1");
-	//pythia.readString("PhaseSpace:pTHatMin = 20.");
-	//pythia.readString("HardQCD:all = on");
+	input = new TFile(name.c_str());
+	ncharged_per_event_hist = (TH1D*) input->Get("ncharged");
 	
-	pythia.readString("HeavyIon:SigFitDefPar = 9.82,1.69,0.29,0.0,0.0,0.0,0.0,0.0");
-	pythia.readString("HeavyIon:SigFitNGen = 0");
+	unsigned int nbins = ncharged_per_event_hist->GetNbinsX();
 	
-	pythia.readString("Random:setSeed = on");
-	pythia.readString(set_seed.c_str());
+	centr_ncharged[0] = new TH1D("centr", "centr", nbins, 0, nbins);
+	centr_ncharged[1] = new TH1D("c20_40", "centr", nbins, 0, nbins);
+	centr_ncharged[2] = new TH1D("c40_60", "centr", nbins, 0, nbins);
+	centr_ncharged[3] = new TH1D("c60_80", "centr", nbins, 0, nbins);
+	centr_ncharged[4] = new TH1D("c80_93", "centr", nbins, 0, nbins);
+	zero_ev_hist = new TH1D("0", "0", nbins, 0, nbins); 
 	
-	pythia.init();
+	for (int count = 0; count < 5; count++) centr_ncharged[count]->SetLineColor(kBlack);
 	
-	const long long unsigned int nEvents = 100000;
+	centr_ncharged[0]->SetFillColor(kBlue-10);
+	centr_ncharged[1]->SetFillColor(kBlue-8);
+	centr_ncharged[2]->SetFillColor(kBlue-6);
+	centr_ncharged[3]->SetFillColor(kBlue-2);
+	centr_ncharged[4]->SetFillColor(kBlue+4);
+	zero_ev_hist->SetFillColor(kBlack);
 	
-	ncharged_per_event_hist = new TH1D("ncharged", "ncharged", 250, 0, 250);
-	ncharged_per_event_hist_no_weight_i_said_you_bro_no_weight_at_all_believe_me_please_i_am_not_joking_can_you_trust_me_at_least_one_time_bro_please_can_you_believe_i_ve_got_ligma = new TH1D("nchargednw", "nchargednw", 250, 0, 250);
+	const long long unsigned int ncharged_total = ncharged_per_event_hist->Integral(1, nbins);
 	
-	for (unsigned long int iEvent = 0; iEvent < nEvents; ++iEvent) {
+	int cnum = 0;
 	
-		if (iEvent % 100 == 0) cout << "Events has passed: " << iEvent << endl;
+	std::array<int, 5> ncharged_centr_range;
+	
+	unsigned long long int prev_sum = 0, sum = 0;
+	
+	TCanvas *c = new TCanvas("bruh");
+	gPad->SetLogy();
+	
+	ncharged_per_event_hist->Draw("AXIS");
+	
+	for (int count = 1; count < nbins; count++) {
 		
-		if (!pythia.next()) continue;
+		prev_sum = sum;
+		sum = ncharged_per_event_hist->Integral(nbins-count, nbins);
 		
-		unsigned int ncharged = 0;
-		double weight = 0;
+		centr_ncharged[cnum]->SetBinContent(nbins-count, ncharged_per_event_hist->GetBinContent(nbins-count));
 		
-		for (int ipart = 0; ipart < pythia.event.size(); ++ipart) {
+		if (sum > centr_h_range[cnum]*ncharged_total/100) {
 		
-			if (pythia.event[ipart].isFinal() && pythia.event[ipart].isCharged()) {
+			if (sum - centr_h_range[cnum]*ncharged_total/100 < centr_h_range[cnum]*ncharged_total/100 - prev_sum) ncharged_centr_range[cnum] = nbins-count;
+			else ncharged_centr_range[cnum] = nbins-count+1;
 			
-				double eta = pythia.event[ipart].eta();
-				if (eta > 3.1 && eta < 4) ncharged++;
-			}
+			centr_ncharged[cnum]->Draw("SAME");
 			
-		weight = pythia.info.weight();
-		
-		ncharged_per_event_hist->Fill(ncharged);
-		ncharged_per_event_hist_no_weight_i_said_you_bro_no_weight_at_all_believe_me_please_i_am_not_joking_can_you_trust_me_at_least_one_time_bro_please_can_you_believe_i_ve_got_ligma->Fill(ncharged, weight);
+			if (static_cast<int>(sum/ncharged_total*100) != 100) cout << cnum << " " << nbins - count << " " << endl;
+			else cout << cnum << " " << nbins - count << " " << (sum-ncharged_per_event_hist->GetBinContent(1))/ncharged_total*100 << endl;
+			
+			cnum++;
 		
 		}
 		
 	}
 	
-	std::cout << "Output file is located at /home/sergey/pythis/pythia8306/pythia_production/output" << std::endl;
-	
-	std::string name = "/home/sergey/pythia/pythia8306/pythia_production/output/pythiaCuAu200_centr_";
-	name += num[1];
-	name.append("_");
-	name.append(".root");
-	
-	output = new TFile(name.c_str(), "RECREATE");
-	ncharged_per_event_hist->Write();
-	ncharged_per_event_hist_no_weight_i_said_you_bro_no_weight_at_all_believe_me_please_i_am_not_joking_can_you_trust_me_at_least_one_time_bro_please_can_you_believe_i_ve_got_ligma->Write();
-	
-	pythia.stat();
-	delete output, ncharged_per_event_hist;
+	zero_ev_hist->SetBinContent(1, ncharged_per_event_hist->GetBinContent(1));
+	zero_ev_hist->Draw("SAME");
 	
 	return 0;
 	

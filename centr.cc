@@ -23,9 +23,8 @@ int main(const unsigned int argc, const char *num[]) {
 	pythia.readString("Beams:idB = 1000791970");
 	
 	pythia.readString("Beams:eCM = 200.");
-	pythia.readString("Beams:frameType = 1");
-	//pythia.readString("PhaseSpace:pTHatMin = 20.");
-	//pythia.readString("HardQCD:all = on");
+	//pythia.readString("PhaseSpace:pTHatMin = 0.");
+	pythia.readString("HardQCD:all = on");
 	
 	pythia.readString("HeavyIon:SigFitDefPar = 9.82,1.69,0.29,0.0,0.0,0.0,0.0,0.0");
 	pythia.readString("HeavyIon:SigFitNGen = 0");
@@ -37,8 +36,10 @@ int main(const unsigned int argc, const char *num[]) {
 	
 	const long long unsigned int nEvents = 100000;
 	
-	ncharged_per_event_hist = new TH1D("ncharged", "ncharged", 250, 0, 250);
-	ncharged_per_event_hist_no_weight_i_said_you_bro_no_weight_at_all_believe_me_please_i_am_not_joking_can_you_trust_me_at_least_one_time_bro_please_can_you_believe_i_ve_got_ligma = new TH1D("nchargednw", "nchargednw", 250, 0, 250);
+	unsigned int nbins = 200;
+	
+	ncharged_per_event_hist = new TH1D("ncharged", "ncharged", nbins, 0, nbins);
+	ncharged_per_event_hist_no_weight_i_said_you_bro_no_weight_at_all_believe_me_please_i_am_not_joking_can_you_trust_me_at_least_one_time_bro_please_can_you_believe_i_ve_got_ligma = new TH1D("nchargednw", "nchargednw", nbins, 0, nbins);
 	
 	for (unsigned long int iEvent = 0; iEvent < nEvents; ++iEvent) {
 	
@@ -55,6 +56,7 @@ int main(const unsigned int argc, const char *num[]) {
 			
 				double eta = pythia.event[ipart].eta();
 				if (eta > 3.1 && eta < 4) ncharged++;
+				//ncharged++;
 			}
 			
 		weight = pythia.info.weight();
