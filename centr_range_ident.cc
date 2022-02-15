@@ -16,7 +16,7 @@ int centr_range_ident() {
 	
 	TFile *input, *output;
 	
-	std::string name = "/home/sergey/pythia/pythia8306/pythia_production/output/pythiaCuAu200_centr_1_.root";
+	std::string name = "/home/sergey/pythia/pythia8306/pythia_production/output/pythiaCuAu200_centr_2_.root";
 	
 	input = new TFile(name.c_str());
 	ncharged_per_event_hist = (TH1D*) input->Get("ncharged");
@@ -36,7 +36,7 @@ int centr_range_ident() {
 	centr_ncharged[1]->SetFillColor(kBlue-8);
 	centr_ncharged[2]->SetFillColor(kBlue-6);
 	centr_ncharged[3]->SetFillColor(kBlue-2);
-	centr_ncharged[4]->SetFillColor(kBlue+4);
+	centr_ncharged[4]->SetFillColor(kBlue+2);
 	zero_ev_hist->SetFillColor(kBlack);
 	
 	const long long unsigned int ncharged_total = ncharged_per_event_hist->Integral(1, nbins);
@@ -52,7 +52,7 @@ int centr_range_ident() {
 	
 	ncharged_per_event_hist->Draw("AXIS");
 	
-	for (int count = 1; count < nbins; count++) {
+	for (int count = 1; count <= nbins; count++) {
 		
 		prev_sum = sum;
 		sum = ncharged_per_event_hist->Integral(nbins-count, nbins);
@@ -66,8 +66,7 @@ int centr_range_ident() {
 			
 			centr_ncharged[cnum]->Draw("SAME");
 			
-			if (static_cast<int>(sum/ncharged_total*100) != 100) cout << cnum << " " << nbins - count << " " << endl;
-			else cout << cnum << " " << nbins - count << " " << (sum-ncharged_per_event_hist->GetBinContent(1))/ncharged_total*100 << endl;
+			cout << cnum << " " << nbins - count << " " << (sum-ncharged_per_event_hist->GetBinContent(count))/ncharged_total*100 << " " << (sum-ncharged_per_event_hist->GetBinContent(1))/ncharged_total*100 << endl;
 			
 			cnum++;
 		

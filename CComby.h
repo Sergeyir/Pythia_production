@@ -2,8 +2,9 @@
 
 #include <array>
 #include <cmath>
+#include <string>
 #include "TFile.h"
-#include "TH2.h"
+#include "TH3.h"
 #include "Pythia8/Pythia.h"
 
 class Particles;
@@ -18,28 +19,21 @@ class CComby: public Particles {
 	
 		TFile *output;
 		
-		std::vector <unsigned int> channels;
-		
-		unsigned const int centr_num = 5, eta_num = 9;
-		
-		unsigned int hist_num = centr_num*eta_num*ch_number;
+		static unsigned const int centr_num = 5;
 		
 		std::array <unsigned const int, centr_num> centr_range_low{0, 20, 40, 60, 80};
 		std::array <unsigned const int, centr_num> centr_range_high{20, 40, 60, 80, 93};
 		
-		std::array <const float, pt_num> eta_range_low{3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9};
-		std::array <const float, pt_num> eta_range_high{3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.};
+		std::array <const int, 3> pos_part_id{211, 321, 2212};
+		std::array <const int, 3> neg_part_id{-211, -321, -2212};
 		
-		std::array <const int, ch_number> pos_part_id{211, 211, 321, 321, 321, 2212, 2212, 211, 2212};
-		std::array <const int, ch_number> neg_part_id{-211, -321, -211, -321, -2212, -321, -2212, -2212, -211};
+		std::array <const std::string, 3> pos_part_name{"Pi", "K", "P"};
+		std::array <const std::string, 3> neg_part_name{"Pibar", "Kbar", "Pbar"};
 	
-		std::array <const std::string, ch_number> decay_channels{"PiPibar", "PiKbar", "KPibar", "KKbar", "KPbar", "PKbar", "PPbar", "PiPbar", "PPibar"};
-	
-		std::array <const std::string, ch_number> bg_hists_names{"PiPibar_BG", "PiKbar_BG", "KPibar_BG", "KKbar_BG", "KPbar_BG", "PKbar_BG", "PPbar_BG", "PiPbar_BG", "PPibar_BG"};
-		std::array <const std::string, ch_number> fg_hists_names{"PiPibar_FG", "PiKbar_FG", "KPibar_FG", "KKbar_FG", "KPbar_FG", "PKbar_FG", "PPbar_FG", "PiPbar_FG", "PPibar_FG"};
-	
-		std::array <TH2F*, ch_number> hist_num;
-		std::array <TH2F*, ch_number> hist_num;
+		std::vector <TH3F*> fg_hists;
+		std::vector <TH3F*> bg_hists;
+		
+		unsigned int chnum = 0;
 		
 		void ClearParticles() {
 		
@@ -49,6 +43,7 @@ class CComby: public Particles {
 			p_px.clear();
 			p_py.clear();
 			p_pz.clear();
+			p_centr.clear();
 			
 			pbar_id.clear();
 			pbar_iEvent.clear();
@@ -56,33 +51,8 @@ class CComby: public Particles {
 			pbar_px.clear();
 			pbar_py.clear();
 			pbar_pz.clear();
+			pbar_centr.clear();
 		
-		}
-		
-		int GetChannelNum(std::string ch_name) {
-			
-			bool check = false;
-			
-			for (int ch_num = 0; ch_num < ch_number; ch_num++) {
-			
-				if (decay_channels[ch_num] == ch_name) {
-				
-					continue;
-					check = true;
-				
-				};
-			
-			}
-			
-			
-			if (check) return ch_number;
-			
-			else {
-		
-				std::cerr << "ERROR in CComby::GetChannelNum: There is no channel named " << ch_name << std::endl;
-				exit(0);
-			
-			}
 		}
 	
 	public:
@@ -114,76 +84,100 @@ class CComby: public Particles {
 		
 		}
 		
-		void AddChannel(int ch_num) {
+		void AddChannel(const unsigned int id1, const unsigned int id2) {
 			
-			for (int num = 0; num < channels.size(); num++) {
+			std::string fg_hist_name, bg_hist_name;
 			
-				if (channels[num] == ch_num) {
-				
-					std::cout << "Channel " << decay_channels[num] << "has already been addet to CComby object. This attempt of adding a new channel will be ignored" << std::endl;
-					return;
-					
-				}
+			chnum++;
+			
+			for (int count = 0; count < 3; count++) {
+			
+				if (id1 == pos_part_id[count]) fg_hist_name.append(pos_part_name[count]);
 			
 			}
 			
-			channels.push_back(ch_num);
+			for (int count = 0; count < 3; count++) {
 			
+				if (id2 == neg_part_id[count]) fg_hist_name.append(neg_part_name[count]);
 			
+			}
 			
-			fg_hists[ch_num] = new TH2F(fg_hists_names[ch_num].c_str(), fg_hists_names[ch_num].c_str(), 80, 0, 8, 4000, 0, 4);
-			bg_hists[ch_num] = new TH2F(bg_hists_names[ch_num].c_str(), bg_hists_names[ch_num].c_str(), 80, 0, 8, 4000, 0, 4);
-		
+			bg_hist_name = fg_hist_name;
+			
+			fg_hist_name.append("_FG");
+			bg_hist_name.append("_BG");
+			
+			for (int count = 0; count < centr_num; count++) {
+			
+				std::string fg_hist_c_name = fg_hist_name;
+				std::string bg_hist_c_name = bg_hist_name;
+				
+				fg_hist_c_name.append(std::to_string(centr_range_low[count]));
+				fg_hist_c_name.append("-");
+				fg_hist_c_name.append(std::to_string(centr_range_high[count]));
+				
+				bg_hist_c_name.append(std::to_string(centr_range_low[count]));
+				bg_hist_c_name.append("-");
+				bg_hist_c_name.append(std::to_string(centr_range_high[count]));
+			
+				fg_hists.push_back(new TH3F(fg_hist_c_name.c_str(), fg_hist_c_name.c_str(), 80, 0, 8, 4000, 0, 4, 12, 0, 1.2));
+				bg_hists.push_back(new TH3F(bg_hist_c_name.c_str(), bg_hist_c_name.c_str(), 80, 0, 8, 4000, 0, 4, 12, 0, 1.2));
+			
+			}
+			
 		}
 	
 		void ProcessEvents() {
 			
-			for (int num; num < channels.size(); num ++) {
-				
-				const int p_size = p_id.size();
-				const int pbar_size = pbar_id.size();
+			const int p_size = p_id.size();
+			const int pbar_size = pbar_id.size();
 			
-				for (int p_num = 0; p_num < p_size; p_num++) {
+			for (unsigned long int p_num = 0; p_num < p_size; p_num++) {
 		
-					for (int pbar_num = 0; pbar_num < pbar_size; pbar_num++) {
+				for (unsigned long int pbar_num = 0; pbar_num < pbar_size; pbar_num++) {
+				
+					if (p_id[p_num] != pos_part_id[ch_count] || pbar_id[pbar_num] != neg_part_id[ch_count]) continue;
 					
-						if (p_id[p_num] != pos_part_id[channels[num]] || pbar_id[pbar_num] != neg_part_id[channels[num]]) continue;
-						
-						const double e2 = pow(p_e[p_num] + pbar_e[pbar_num], 2);
-						const double p2 = pow(p_px[p_num] + pbar_px[pbar_num], 2) + pow(p_py[p_num] + pbar_py[pbar_num], 2) + pow(p_pz[p_num] + pbar_pz[pbar_num], 2);
-						const double m = sqrt(e2 - p2);
-						
-						bg_hists[channels[num]]->Fill(sqrt(p2), m);
-						
-						if (p_iEvent[p_num] == pbar_iEvent[pbar_num]) {fg_hists[channels[num]]->Fill(sqrt(p2), m);}
+					const double e2 = pow(p_e[p_num] + pbar_e[pbar_num], 2);
+					const double p2 = pow(p_px[p_num] + pbar_px[pbar_num], 2) + pow(p_py[p_num] + pbar_py[pbar_num], 2) + pow(p_pz[p_num] + pbar_pz[pbar_num], 2);
+					const double m = sqrt(e2 - p2);
+					const double eta = 1/2*log((sqrt(p2)+p_pz[p_num]+pbar_pz[pbar_num])/(sqrt(p2)-p_pz[p_num]-pbar_pz[pbar_num]));
 					
+					for (int ch_count = 0; ch_count < chnum; ch_count++) {
+						
+						for (int count = 0; count < centr_num; count++) {
+						
+							bg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m, eta);
+							if (p_iEvent[p_num] == pbar_iEvent[pbar_num]) {fg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m, eta);}
+						
+						}
+						
+						
 					}
-		
+					
 				}
 		
 			}
 		
-			ClearParticles();	
+			ClearParticles();
 	
 		}
 		
 		void Write() {
 			
-			for (int num = 0; num < channels.size(); num++) {
+			for (int num = 0; num < fg_hists.size(); num++) {
 			
-				fg_hists[channels[num]]->Write();
-				bg_hists[channels[num]]->Write();
+				fg_hists[num]->Write();
+				bg_hists[num]->Write();
 			
 			}
 		}
 	
 		~CComby() {
 			
+			for (int num = 0; num < fg_hists.size(); num++) {
 			
-			
-			for (int num = 0; num < channels.size(); num++) {
-			
-				delete fg_hists[channels[num]], bg_hists[channels[num]];
+				delete fg_hists[num], bg_hists[num];
 			
 			}
 			

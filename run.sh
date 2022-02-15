@@ -2,5 +2,5 @@
 
 name=$1
 
-make ${name} && ./${name} 1 &> log/gp_${name}_${i}.log & disown
+make ${name} && ./${name} 2 &> log/gp_${name}_${i}.log & disown
 

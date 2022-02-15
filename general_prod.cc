@@ -14,20 +14,26 @@ int main(const unsigned int argc, const char *num[]) {
 	pythia.readString("Beams:eCM = 200.");
 	pythia.readString("Beams:idA = 1000290630");
 	pythia.readString("Beams:idB = 1000791970");
+	
+	pythia.readString("HeavyIon:SigFitDefPar = 9.82,1.69,0.29,0.0,0.0,0.0,0.0,0.0");
+	pythia.readString("HeavyIon:SigFitNGen = 0");
+	
 	pythia.readString("HardQCD:all = on");
 	pythia.readString("Random:setSeed = on");
 	pythia.readString(set_seed.c_str());
 	
 	pythia.init();
 	
-	long unsigned int nEvents = 100000;
+	long unsigned int nEvents = 10000;
 	const int mix_num = 2;
-	const int cc_size = 10000;
+	const int cc_size = 1000;
 	bool check{true};
 	
 	std::cout << "Output files are located in /home/sergey/Root/Projects/lambda1520/data/pythia_production" << std::endl;
 	
 	CComby *CC;
+	
+	unsigned int out_number = 0;
 	
 	for (unsigned long int iEvent = 0; iEvent < nEvents; ++iEvent) {
 	
@@ -39,13 +45,15 @@ int main(const unsigned int argc, const char *num[]) {
 			std::string name = "/home/sergey/Root/Projects/lambda1520/data/pythia_production/pythiaCuAu200_";
 			name += num[1];
 			name.append("_");
-			name.append(to_string(static_cast<double>(iEvent)/cc_size));
+			name.append(to_string(out_number));
 			name.append(".root");
 			
-			CC->AddChannel(1);
-			CC->AddChannel(2);
+			CC->AddChannel(211, -321);
+			CC->AddChannel(321, -211);
 			
 			CC->SetOutput(name.c_str());
+			
+			out_number++;
 				
 		};
 		
@@ -61,6 +69,8 @@ int main(const unsigned int argc, const char *num[]) {
 				double eta = pythia.event[ipart].eta();
 				
 				if (eta < 3.1 && eta > 4) continue;
+				
+				ncharged++;
 			
 				int id, centr;
 				double e, px, py, pz;
@@ -75,8 +85,6 @@ int main(const unsigned int argc, const char *num[]) {
 				pz = pythia.event[ipart].pz();
 				
 				CC->AddParticle(id, iEvent, e, px, py, pz);
-				
-				ncharged++;
 				
 			}
 		}

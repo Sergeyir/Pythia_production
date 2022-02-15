@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <vector>
 #include <iostream>
 
@@ -9,16 +10,16 @@ class Particles {
 	
 	std::vector <int> p_id, pbar_id;
 	std::vector <unsigned int> p_iEvent, pbar_iEvent;
-	std::vector <double> p_e, p_px, p_py, p_pz, pbar_e, pbar_px, pbar_py, pbar_pz, p_eta, p_centr;
-	std::vector <unsigned int> event_centr, event_iEvent;
+	std::vector <double> p_e, p_px, p_py, p_pz, pbar_e, pbar_px, pbar_py, pbar_pz;
+	std::vector <unsigned int> p_centr, pbar_centr;
 	
-	std::array <const unsigned int, 5> centr_det{200, 69, 26, 5, 1}
+	std::array <const unsigned int, 6> centr_det{200, 96, 53, 23, 7, 2};
 	
 	public:
 	
 	Particles() {	}
 	
-	void AddParticle(const int id, const unsigned int iEvent, const double e, const double px, const double py, const double pz, const double eta) {
+	void AddParticle(const int id, const unsigned int iEvent, const double e, const double px, const double py, const double pz) {
 		
 		if (id > 0) {
 		
@@ -28,11 +29,10 @@ class Particles {
 			p_px.push_back(px);
 			p_py.push_back(py);
 			p_pz.push_back(pz);
-			p_eta.push_back(eta);
 		
 		}
 		
-		else if (id < 0) { 
+		else if (id < 0) {
 			
 			pbar_id.push_back(id);
 			pbar_iEvent.push_back(iEvent);
@@ -40,7 +40,6 @@ class Particles {
 			pbar_px.push_back(px);
 			pbar_py.push_back(py);
 			pbar_pz.push_back(pz);
-			pbar_eta.push_back(eta);
 			
 		}
 		
@@ -58,9 +57,18 @@ class Particles {
 		
 		}
 		
-		event_centr.push_back(centr);
-		event_iEvent.push_back(iEvent);
-	
+		for (unsigned int count = 0; count < p_iEvent.size(); count++) {
+		
+			if (iEvent == p_iEvent[count]) p_centr.push_back(centr);
+		
+		}
+		
+		for (unsigned int count = 0; count < pbar_iEvent.size(); count++) {
+		
+			if (iEvent == pbar_iEvent[count]) pbar_centr.push_back(centr);
+		
+		}
+		
 	}
 
 };
