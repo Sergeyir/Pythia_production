@@ -24,9 +24,9 @@ int main(const unsigned int argc, const char *num[]) {
 	
 	pythia.init();
 	
-	long unsigned int nEvents = 10000;
+	long unsigned int nEvents = 250000;
 	const int mix_num = 2;
-	const int cc_size = 1000;
+	const int cc_size = 10000;
 	bool check{true};
 	
 	std::cout << "Output files are located in /home/sergey/Root/Projects/lambda1520/data/pythia_production" << std::endl;

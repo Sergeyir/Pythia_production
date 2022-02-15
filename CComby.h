@@ -136,14 +136,14 @@ class CComby: public Particles {
 		
 				for (unsigned long int pbar_num = 0; pbar_num < pbar_size; pbar_num++) {
 				
-					if (p_id[p_num] != pos_part_id[ch_count] || pbar_id[pbar_num] != neg_part_id[ch_count]) continue;
-					
 					const double e2 = pow(p_e[p_num] + pbar_e[pbar_num], 2);
 					const double p2 = pow(p_px[p_num] + pbar_px[pbar_num], 2) + pow(p_py[p_num] + pbar_py[pbar_num], 2) + pow(p_pz[p_num] + pbar_pz[pbar_num], 2);
 					const double m = sqrt(e2 - p2);
 					const double eta = 1/2*log((sqrt(p2)+p_pz[p_num]+pbar_pz[pbar_num])/(sqrt(p2)-p_pz[p_num]-pbar_pz[pbar_num]));
 					
 					for (int ch_count = 0; ch_count < chnum; ch_count++) {
+					
+					if (p_id[p_num] != pos_part_id[ch_count] || pbar_id[pbar_num] != neg_part_id[ch_count]) continue;
 						
 						for (int count = 0; count < centr_num; count++) {
 						
