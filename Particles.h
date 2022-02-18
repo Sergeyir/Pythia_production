@@ -13,7 +13,8 @@ class Particles {
 	std::vector <double> p_e, p_px, p_py, p_pz, pbar_e, pbar_px, pbar_py, pbar_pz;
 	std::vector <unsigned int> p_centr, pbar_centr;
 	
-	std::array <const unsigned int, 6> centr_det{200, 96, 53, 23, 7, 2};
+	//std::array <const unsigned int, 6> centr_det{200, 96, 53, 23, 7, 2}; //centality ranges for CuAu200
+	std::array <const unsigned int, 6> centr_det{200, 4, 3, 2, 1, 0}; //centality ranges for pp200
 	
 	public:
 	
@@ -47,7 +48,7 @@ class Particles {
 		
 	}
 	
-	void SetCentrality(const int iEvent, const int ncharged) {
+	int SetCentrality(const int iEvent, const int ncharged) {
 		
 		unsigned int centr = 0;
 		
@@ -68,6 +69,8 @@ class Particles {
 			if (iEvent == pbar_iEvent[count]) pbar_centr.push_back(centr);
 		
 		}
+		
+		return centr;
 		
 	}
 

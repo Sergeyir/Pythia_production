@@ -4,7 +4,7 @@
 #include <cmath>
 #include <string>
 #include "TFile.h"
-#include "TH3.h"
+#include "TH2.h"
 #include "Pythia8/Pythia.h"
 
 class Particles;
@@ -13,16 +13,16 @@ class CComby: public Particles {
 	
 	private:
 	
-		static const unsigned int ch_number{9}; //number of decay channels
-		
 		bool check{true}; 
 	
 		TFile *output;
 		
 		static unsigned const int centr_num = 5;
 		
-		std::array <unsigned const int, centr_num> centr_range_low{0, 20, 40, 60, 80};
+		std::array <unsigned const int, centr_num> centr_range_low{0, 10, 20, 30, 80};
 		std::array <unsigned const int, centr_num> centr_range_high{20, 40, 60, 80, 93};
+		
+		std::array <std::string, 5> output_dir_names;
 		
 		std::array <const int, 3> pos_part_id{211, 321, 2212};
 		std::array <const int, 3> neg_part_id{-211, -321, -2212};
@@ -30,8 +30,8 @@ class CComby: public Particles {
 		std::array <const std::string, 3> pos_part_name{"Pi", "K", "P"};
 		std::array <const std::string, 3> neg_part_name{"Pibar", "Kbar", "Pbar"};
 	
-		std::vector <TH3F*> fg_hists;
-		std::vector <TH3F*> bg_hists;
+		std::vector <TH2F*> fg_hists;
+		std::vector <TH2F*> bg_hists;
 		
 		unsigned int chnum = 0;
 		
@@ -57,12 +57,15 @@ class CComby: public Particles {
 	
 	public:
 	
-		CComby() {	}
-	
-		int GetNumberOfChannels() {
-		
-			return ch_number;
-	
+		CComby() {
+			
+			for (int count = 0; count < 5; count++) {
+			
+				output_dir_names[count] = "c0";
+				output_dir_names[count].append(std::to_string(count));
+				output_dir_names[count].append("_z00_r00");
+			
+			}
 		}
 		
 		void SetOutput(std::string output_name, std::string option = "RECREATE") {
@@ -79,9 +82,11 @@ class CComby: public Particles {
 				delete output;
 				output = new TFile(output_name.c_str(), option.c_str());
 			
-			}	
+			}
 			
-		
+			
+			
+			for (int count = 0; count < 5; count++) {output->mkdir(output_dir_names[count].c_str());}
 		}
 		
 		void AddChannel(const unsigned int id1, const unsigned int id2) {
@@ -120,8 +125,8 @@ class CComby: public Particles {
 				bg_hist_c_name.append("-");
 				bg_hist_c_name.append(std::to_string(centr_range_high[count]));
 			
-				fg_hists.push_back(new TH3F(fg_hist_c_name.c_str(), fg_hist_c_name.c_str(), 80, 0, 8, 4000, 0, 4, 12, 0, 1.2));
-				bg_hists.push_back(new TH3F(bg_hist_c_name.c_str(), bg_hist_c_name.c_str(), 80, 0, 8, 4000, 0, 4, 12, 0, 1.2));
+				fg_hists.push_back(new TH2F(fg_hist_c_name.c_str(), fg_hist_c_name.c_str(), 80, 0, 8, 4000, 0, 4));
+				bg_hists.push_back(new TH2F(bg_hist_c_name.c_str(), bg_hist_c_name.c_str(), 80, 0, 8, 4000, 0, 4));
 			
 			}
 			
@@ -139,7 +144,7 @@ class CComby: public Particles {
 					const double e2 = pow(p_e[p_num] + pbar_e[pbar_num], 2);
 					const double p2 = pow(p_px[p_num] + pbar_px[pbar_num], 2) + pow(p_py[p_num] + pbar_py[pbar_num], 2) + pow(p_pz[p_num] + pbar_pz[pbar_num], 2);
 					const double m = sqrt(e2 - p2);
-					const double eta = 1/2*log((sqrt(p2)+p_pz[p_num]+pbar_pz[pbar_num])/(sqrt(p2)-p_pz[p_num]-pbar_pz[pbar_num]));
+					//const double eta = 1/2*log((sqrt(p2)+p_pz[p_num]+pbar_pz[pbar_num])/(sqrt(p2)-p_pz[p_num]-pbar_pz[pbar_num]));
 					
 					for (int ch_count = 0; ch_count < chnum; ch_count++) {
 					
@@ -147,8 +152,8 @@ class CComby: public Particles {
 						
 						for (int count = 0; count < centr_num; count++) {
 						
-							bg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m, eta);
-							if (p_iEvent[p_num] == pbar_iEvent[pbar_num]) {fg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m, eta);}
+							bg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m);
+							if (p_iEvent[p_num] == pbar_iEvent[pbar_num]) {fg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m);}
 						
 						}
 						
@@ -165,12 +170,19 @@ class CComby: public Particles {
 		
 		void Write() {
 			
-			for (int num = 0; num < fg_hists.size(); num++) {
+			for (int ch_count = 0; ch_count < chnum; ch_count++) {
 			
-				fg_hists[num]->Write();
-				bg_hists[num]->Write();
-			
+				for (int count = 0; count < centr_num; count++) {
+					
+					output->cd(output_dir_names[count].c_str());
+					
+					fg_hists[ch_count*centr_num+count]->Write();
+					bg_hists[ch_count*centr_num+count]->Write();
+				
+				}
 			}
+			
+			output->Close();
 		}
 	
 		~CComby() {

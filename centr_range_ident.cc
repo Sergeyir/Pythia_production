@@ -16,7 +16,7 @@ int centr_range_ident() {
 	
 	TFile *input, *output;
 	
-	std::string name = "/home/sergey/pythia/pythia8306/pythia_production/output/pythiaCuAu200_centr_2_.root";
+	std::string name = "/home/sergey/Root/Projects/pythia_production/output/pythiaPP200_centr_1_.root";
 	
 	input = new TFile(name.c_str());
 	ncharged_per_event_hist = (TH1D*) input->Get("ncharged");
