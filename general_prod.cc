@@ -18,11 +18,11 @@ int main(const unsigned int argc, const char *num[]) {
 	pythia.readString("HardQCD:all = on");
 	pythia.readString("PhaseSpace:pTHatMin = 20.");
 	
-	pythia.readString("Beams:idA = 2212"); //pp
-	pythia.readString("Beams:idB = 2212");
+	//pythia.readString("Beams:idA = 2212"); //pp
+	//pythia.readString("Beams:idB = 2212");
 	
-	//pythia.readString("Beams:idA = 1000290630");//Cu
-	//pythia.readString("Beams:idB = 1000791970");//Au
+	pythia.readString("Beams:idA = 1000290630");//Cu
+	pythia.readString("Beams:idB = 1000791970");//Au
 	
 	//pythia.readString("HeavyIon:SigFitDefPar = 9.82,1.69,0.29,0.0,0.0,0.0,0.0,0.0"); \\CuAu200 parameters
 	//pythia.readString("HeavyIon:SigFitNGen = 0");
@@ -32,9 +32,9 @@ int main(const unsigned int argc, const char *num[]) {
 	
 	pythia.init();
 	
-	long unsigned int nEvents = 25000;
-	const int mix_num = 2;
-	const int cc_size = 1000;
+	long unsigned int nEvents = 250000;	//number of events
+	const int mix_num = 2;			//number of events to mix
+	const int cc_size = 10000;		//number of events to write after mixing
 	bool check{true};
 	
 	std::cout << "Output files are located in /home/sergey/Root/Projects/data/pythia_production" << std::endl;
@@ -70,7 +70,7 @@ int main(const unsigned int argc, const char *num[]) {
 			CC = new CComby();
 			check = false;
 			
-			std::string name = "/home/sergey/Root/Projects/lambda1520/data/pythia_production/pythiaPP200_";
+			std::string name = "/home/sergey/Root/Projects/data/pythia_production/pythiaPP200_";
 			name += num[1];
 			name.append("_");
 			name.append(to_string(out_number));
@@ -138,13 +138,13 @@ int main(const unsigned int argc, const char *num[]) {
 			CC->ProcessEvents();
 			
 			if (iEvent % cc_size == 0) {
-			
+				
 				cout << "The process is ready for " << static_cast<double>(iEvent)/nEvents*100 << " percent" << endl;
 				CC->Write();
 				
 				delete CC;
 				check = true;
-			
+				
 			}
 			
 		}
@@ -152,7 +152,7 @@ int main(const unsigned int argc, const char *num[]) {
 	
 	for (int count = 0; count < kstar_mult.size(); count++) {
 	
-		for (int pt_count = 0; pt_count < pt_range.size(); pt_count++) {
+		for (int pt_count = 0; pt_count < pt_range.size()-1; pt_count++) {
 		
 		kstar_mult[count]->AddPoint(pt_range[pt_count+1], nkstars_centr[count][pt_count]);
 		
@@ -163,6 +163,9 @@ int main(const unsigned int argc, const char *num[]) {
 	TCanvas *c = new TCanvas("kstar_mult", "kstar_mult");
 	
 	for (int count = 0; count < kstar_mult.size(); count++) {kstar_mult[count]->Draw("EP+");};	
+	
+	c->Write();
+	
 	pythia.stat();
 	
 	return 0;

@@ -6,6 +6,7 @@
 #include "TFile.h"
 #include "TH2.h"
 #include "Pythia8/Pythia.h"
+#include <memory>
 
 class Particles;
 
@@ -30,8 +31,8 @@ class CComby: public Particles {
 		std::array <const std::string, 3> pos_part_name{"Pi", "K", "P"};
 		std::array <const std::string, 3> neg_part_name{"Pibar", "Kbar", "Pbar"};
 	
-		std::vector <TH2F*> fg_hists;
-		std::vector <TH2F*> bg_hists;
+		std::vector <std::unique_ptr<TH2F>> fg_hists;
+		std::vector <std::unique_ptr<TH2F>> bg_hists;
 		
 		unsigned int chnum = 0;
 		
@@ -109,25 +110,30 @@ class CComby: public Particles {
 			
 			bg_hist_name = fg_hist_name;
 			
+			fg_hist_name.append("_V1");
+			bg_hist_name.append("_V1");
+			
 			fg_hist_name.append("_FG");
 			bg_hist_name.append("_BG");
 			
+			std::cout << "Stupid dynamic memory allocation" << std::endl;
+			
+			const unsigned int hists_size = fg_hists.size();
+			
+			fg_hists.resize(hists_size + centr_num);
+			bg_hists.resize(hists_size + centr_num);
+			
 			for (int count = 0; count < centr_num; count++) {
 			
-				std::string fg_hist_c_name = fg_hist_name;
-				std::string bg_hist_c_name = bg_hist_name;
+				std::string fg_hist_name_c = fg_hist_name;
+				std::string bg_hist_name_c = bg_hist_name;
 				
-				fg_hist_c_name.append(std::to_string(centr_range_low[count]));
-				fg_hist_c_name.append("-");
-				fg_hist_c_name.append(std::to_string(centr_range_high[count]));
+				fg_hist_name_c.append(std::to_string(count));
+				bg_hist_name_c.append(std::to_string(count));
 				
-				bg_hist_c_name.append(std::to_string(centr_range_low[count]));
-				bg_hist_c_name.append("-");
-				bg_hist_c_name.append(std::to_string(centr_range_high[count]));
-			
-				fg_hists.push_back(new TH2F(fg_hist_c_name.c_str(), fg_hist_c_name.c_str(), 80, 0, 8, 4000, 0, 4));
-				bg_hists.push_back(new TH2F(bg_hist_c_name.c_str(), bg_hist_c_name.c_str(), 80, 0, 8, 4000, 0, 4));
-			
+				fg_hists[hists_size+count].reset(new TH2F(fg_hist_name_c.c_str(), fg_hist_name_c.c_str(), 80, 0, 8, 4000, 0, 4));
+				bg_hists[hists_size+count].reset(new TH2F(bg_hist_name_c.c_str(), fg_hist_name_c.c_str(), 80, 0, 8, 4000, 0, 4));
+				
 			}
 			
 		}
@@ -186,12 +192,23 @@ class CComby: public Particles {
 		}
 	
 		~CComby() {
-			
-			for (int num = 0; num < fg_hists.size(); num++) {
-			
-				delete fg_hists[num], bg_hists[num];
+		
+			std::cout << "Useless destructor " << std::endl;
+		
+			/*
+		
+			while(!fg_hists.empty()) {
+				
+				delete fg_hists.back(), bg_hists.back();
+				
+				fg_hists.pop_back();
+				bg_hists.pop_back();
+				
+				std::cout << "Absolutely useless memory deleting" << std::endl;
 			
 			}
+			
+			*/
 			
 			output->Close();
 			
