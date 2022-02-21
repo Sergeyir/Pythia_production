@@ -116,8 +116,6 @@ class CComby: public Particles {
 			fg_hist_name.append("_FG");
 			bg_hist_name.append("_BG");
 			
-			std::cout << "Stupid dynamic memory allocation" << std::endl;
-			
 			const unsigned int hists_size = fg_hists.size();
 			
 			fg_hists.resize(hists_size + centr_num);
@@ -192,8 +190,6 @@ class CComby: public Particles {
 		}
 	
 		~CComby() {
-		
-			std::cout << "Useless destructor " << std::endl;
 		
 			/*
 		
