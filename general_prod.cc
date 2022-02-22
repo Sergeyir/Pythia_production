@@ -168,8 +168,8 @@ int main(const unsigned int argc, const char *num[]) {
 	
 	pythia.stat();
 	
-	if (num[1] == 1) system("echo 'pythia_production' | mail -s 'pythia_production with seed 1 has ended calculations' 'antsupov0124@gmail.com'");
-	system("shutdown -r +120);
+	if (num[1] == "1") system("echo 'pythia_production' | mail -s 'pythia_production with seed 1 has ended calculations' 'antsupov0124@gmail.com'");
+	system("shutdown -r +120");
 	
 	return 0;
 	

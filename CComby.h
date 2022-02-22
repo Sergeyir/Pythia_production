@@ -28,7 +28,7 @@ class CComby: public Particles {
 		std::array <const std::string, 3> part_name{"Pi", "K", "P"};
 	
 		std::vector <std::unique_ptr<TH2F>> fg_hists, bg_hists;
-		std::vector <unsigned int, 3> pos_part_ch_id, neg_part_ch_id;
+		std::vector <unsigned int> pos_part_ch_id, neg_part_ch_id;
 		
 		unsigned int chnum = 0;
 		
