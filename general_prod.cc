@@ -15,8 +15,8 @@ int main(const unsigned int argc, const char *num[]) {
 	
 	Pythia pythia;
 	pythia.readString("Beams:eCM = 200.");
-	pythia.readString("HardQCD:all = on");
-	pythia.readString("PhaseSpace:pTHatMin = 20.");
+	//pythia.readString("HardQCD:all = on");
+	//pythia.readString("PhaseSpace:pTHatMin = 20.");
 	
 	//pythia.readString("Beams:idA = 2212"); //pp
 	//pythia.readString("Beams:idB = 2212");
@@ -24,8 +24,8 @@ int main(const unsigned int argc, const char *num[]) {
 	pythia.readString("Beams:idA = 1000290630");//Cu
 	pythia.readString("Beams:idB = 1000791970");//Au
 	
-	//pythia.readString("HeavyIon:SigFitDefPar = 9.82,1.69,0.29,0.0,0.0,0.0,0.0,0.0"); \\CuAu200 parameters
-	//pythia.readString("HeavyIon:SigFitNGen = 0");
+	pythia.readString("HeavyIon:SigFitDefPar = 9.82,1.69,0.29,0.0,0.0,0.0,0.0,0.0"); //CuAu200 parameters
+	pythia.readString("HeavyIon:SigFitNGen = 0");
 	
 	pythia.readString("Random:setSeed = on");
 	pythia.readString(set_seed.c_str());
@@ -76,8 +76,8 @@ int main(const unsigned int argc, const char *num[]) {
 			name.append(to_string(out_number));
 			name.append(".root");
 			
-			CC->AddChannel(211, -321);
-			CC->AddChannel(321, -211);
+			CC->AddChannel(211, 321);
+			CC->AddChannel(2212, 321);
 			
 			CC->SetOutput(name.c_str());
 			
@@ -167,6 +167,9 @@ int main(const unsigned int argc, const char *num[]) {
 	c->Write();
 	
 	pythia.stat();
+	
+	if (num[1] == 1) system("echo 'pythia_production' | mail -s 'pythia_production with seed 1 has ended calculations' 'antsupov0124@gmail.com'");
+	system("shutdown -r +120);
 	
 	return 0;
 	
