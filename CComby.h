@@ -148,8 +148,8 @@ class CComby: public Particles {
 					if ((p_id[p_num] != pos_part_ch_id[ch_count] || abs(pbar_id[pbar_num]) != neg_part_ch_id[ch_count]) && (p_id[p_num] != neg_part_ch_id[ch_count] || abs(pbar_id[pbar_num]) != pos_part_ch_id[ch_count])) continue;
 						
 						for (int count = 0; count < centr_num; count++) {
-						
-							if (p_iEvent[p_num] != pbar_iEvent[pbar_num]) bg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m);
+							
+							if (centr_num == pbar_centr[pbar_num] && centr_num == p_centr[p_num] && p_iEvent[p_num] != pbar_iEvent[pbar_num]) bg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m);
 							else fg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m);
 						
 						}

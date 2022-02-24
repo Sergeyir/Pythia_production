@@ -33,7 +33,7 @@ int main(const unsigned int argc, const char *num[]) {
 	pythia.init();
 	
 	long unsigned int nEvents = 250000;	//number of events
-	const int mix_num = 2;			//number of events to mix
+	const int mix_num = 10;		//number of events to mix
 	const int cc_size = 10000;		//number of events to write after mixing
 	bool check{true};
 	
@@ -70,14 +70,13 @@ int main(const unsigned int argc, const char *num[]) {
 			CC = new CComby();
 			check = false;
 			
-			std::string name = "/home/sergey/Root/Projects/data/pythia_production/pythiaPP200_";
+			std::string name = "/home/sergey/Root/Projects/data/pythia_production/pythiaCuAu200_";
 			name += num[1];
 			name.append("_");
 			name.append(to_string(out_number));
 			name.append(".root");
 			
 			CC->AddChannel(211, 321);
-			CC->AddChannel(2212, 321);
 			
 			CC->SetOutput(name.c_str());
 			
@@ -162,13 +161,13 @@ int main(const unsigned int argc, const char *num[]) {
 	
 	TCanvas *c = new TCanvas("kstar_mult", "kstar_mult");
 	
-	for (int count = 0; count < kstar_mult.size(); count++) {kstar_mult[count]->Draw("EP+");};	
+	for (int count = 0; count < kstar_mult.size(); count++) {kstar_mult[count]->Draw("EP+");};
 	
 	c->Write();
 	
 	pythia.stat();
 	
-	if (num[1] == "1") system("echo 'pythia_production' | mail -s 'pythia_production with seed 1 has ended calculations' 'petergriffinnutchin@mail.org'");
+	system("echo 'pythia_production has ended calculations' | mail -s 'pythia_production' 'antsupov0124@gmail.com'");
 	system("shutdown -r +120");
 	
 	return 0;
