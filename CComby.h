@@ -121,7 +121,9 @@ class CComby: public Particles {
 			bg_hists.resize(hists_size + centr_num);
 			
 			for (int count = 0; count < centr_num; count++) {
-			
+				
+				std::cout << "bruh" << std::endl;
+				
 				fg_hists[hists_size+count].reset(new TH2F(fg_hist_name.c_str(), fg_hist_name.c_str(), 80, 0, 8, 4000, 0, 4));
 				bg_hists[hists_size+count].reset(new TH2F(bg_hist_name.c_str(), fg_hist_name.c_str(), 80, 0, 8, 4000, 0, 4));
 				
@@ -137,7 +139,9 @@ class CComby: public Particles {
 			for (unsigned long int p_num = 0; p_num < p_size; p_num++) {
 		
 				for (unsigned long int pbar_num = 0; pbar_num < pbar_size; pbar_num++) {
-				
+					
+					if (pbar_centr[p_num] != p_centr[pbar_num]) continue;
+					
 					const double e2 = pow(p_e[p_num] + pbar_e[pbar_num], 2);
 					const double p2 = pow(p_px[p_num] + pbar_px[pbar_num], 2) + pow(p_py[p_num] + pbar_py[pbar_num], 2) + pow(p_pz[p_num] + pbar_pz[pbar_num], 2);
 					const double m = sqrt(e2 - p2);
@@ -148,9 +152,11 @@ class CComby: public Particles {
 					if ((p_id[p_num] != pos_part_ch_id[ch_count] || abs(pbar_id[pbar_num]) != neg_part_ch_id[ch_count]) && (p_id[p_num] != neg_part_ch_id[ch_count] || abs(pbar_id[pbar_num]) != pos_part_ch_id[ch_count])) continue;
 						
 						for (int count = 0; count < centr_num; count++) {
+						
+							if (count != p_centr[p_num]) continue;
 							
-							if (centr_num == pbar_centr[pbar_num] && centr_num == p_centr[p_num] && p_iEvent[p_num] != pbar_iEvent[pbar_num]) bg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m);
-							else fg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m);
+							if (p_iEvent[p_num] != pbar_iEvent[pbar_num]) bg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m);
+							else  fg_hists[ch_count*centr_num+count]->Fill(sqrt(p2), m);
 						
 						}
 						
@@ -184,8 +190,8 @@ class CComby: public Particles {
 	
 		~CComby() {
 		
+			
 			/*
-		
 			while(!fg_hists.empty()) {
 				
 				delete fg_hists.back(), bg_hists.back();
@@ -195,9 +201,9 @@ class CComby: public Particles {
 				
 				std::cout << "Absolutely useless memory deleting" << std::endl;
 			
-			}
+			}*/
 			
-			*/
+			
 			
 			output->Close();
 			

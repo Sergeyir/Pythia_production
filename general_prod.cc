@@ -6,12 +6,12 @@
 
 using namespace Pythia8;
 
-int main(const unsigned int argc, const char *num[]) {
+int main(const unsigned int seed_num) {
 
-	std::cout << "This is the process " << num[1] << std::endl;
+	std::cout << "This is the process " << seed_num << std::endl;
 	
 	std::string set_seed("Random:seed = ");
-	set_seed += num[1];
+	set_seed.append(to_string(seed_num));
 	
 	Pythia pythia;
 	pythia.readString("Beams:eCM = 200.");
@@ -32,9 +32,9 @@ int main(const unsigned int argc, const char *num[]) {
 	
 	pythia.init();
 	
-	long unsigned int nEvents = 250000;	//number of events
+	long unsigned int nEvents = 2500000;	//number of events
 	const int mix_num = 10;		//number of events to mix
-	const int cc_size = 10000;		//number of events to write after mixing
+	const int cc_size = 100000;		//number of events to write after mixing
 	bool check{true};
 	
 	std::cout << "Output files are located in /home/sergey/Root/Projects/data/pythia_production" << std::endl;
@@ -71,7 +71,7 @@ int main(const unsigned int argc, const char *num[]) {
 			check = false;
 			
 			std::string name = "/home/sergey/Root/Projects/data/pythia_production/pythiaCuAu200_";
-			name += num[1];
+			name += seed_num;
 			name.append("_");
 			name.append(to_string(out_number));
 			name.append(".root");
@@ -84,33 +84,33 @@ int main(const unsigned int argc, const char *num[]) {
 				
 		};
 		
-		
 		if (!pythia.next()) continue;
+		
 		std::array<unsigned int, 12> nkstars;
 		unsigned int ncharged = 0;
 		
 		for (int ipart = 0; ipart < pythia.event.size(); ++ipart) {
-		
-		if (abs(pythia.event[ipart].id()) == 313) {
-		
-			for (int count = 0; count < pt_range.size() - 1; count++) {
-				
-				float pt = pythia.event[ipart].pT();
-				
-				if (pt > pt_range[count] && pt < pt_range[count+1])  nkstars[count]++;
 			
+			int d1 = pythia.event[ipart].daughter1();
+			int d2 = pythia.event[ipart].daughter2();
+			
+			if (abs(pythia.event[ipart].id()) == 313 && ((abs(pythia.event[d1].id()) == 211 && abs(pythia.event[d2].id()) == 211))) {
+				for (int count = 0; count < pt_range.size() - 1; count++) {
+				
+					float pt = pythia.event[ipart].pT();
+					if (pt > pt_range[count] && pt < pt_range[count+1])  nkstars[count]++;
+			
+				}
 			}
-		
-		}
 		
 			if (pythia.event[ipart].isFinal() && pythia.event[ipart].isCharged()) {
 			
 				double eta = pythia.event[ipart].eta();
 				
-				if (eta < 3.1 && eta > 4) continue;
+				if (eta < 3.1 || eta > 4) continue;
 				
 				ncharged++;
-			
+				
 				int id, centr;
 				double e, px, py, pz;
 				
@@ -149,6 +149,8 @@ int main(const unsigned int argc, const char *num[]) {
 		}
 	}
 	
+	TFile *t = new TFile("KStar.root", "RECREATE");
+	
 	for (int count = 0; count < kstar_mult.size(); count++) {
 	
 		for (int pt_count = 0; pt_count < pt_range.size()-1; pt_count++) {
@@ -156,19 +158,19 @@ int main(const unsigned int argc, const char *num[]) {
 		kstar_mult[count]->AddPoint(pt_range[pt_count+1], nkstars_centr[count][pt_count]);
 		
 		}
-	
+		
 	}
 	
 	TCanvas *c = new TCanvas("kstar_mult", "kstar_mult");
 	
 	for (int count = 0; count < kstar_mult.size(); count++) {kstar_mult[count]->Draw("EP+");};
 	
-	c->Write();
+	c->Print("CuAu200_KStar_out.png");
 	
 	pythia.stat();
 	
-	system("echo 'pythia_production has ended calculations' | mail -s 'pythia_production' 'antsupov0124@gmail.com'");
-	system("shutdown -r +120");
+	//system("echo 'pythia_production has ended calculations' | mail -s 'pythia_production' 'antsupov0124@gmail.com'");
+	//system("shutdown -r +120");
 	
 	return 0;
 	

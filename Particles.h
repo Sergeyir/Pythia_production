@@ -50,12 +50,12 @@ class Particles {
 	
 	int SetCentrality(const int iEvent, const int ncharged) {
 		
-		unsigned int centr = 0;
+		unsigned int centr = 4;
 		
 		for (int count = 0; count < centr_det.size() - 1; count++) {
 		
-			if (ncharged > centr_det[count] && ncharged < centr_det[count+1]) centr = count;
-		
+			if (ncharged > centr_det[count+1] && ncharged < centr_det[count]) centr = count;
+			
 		}
 		
 		for (unsigned int count = 0; count < p_iEvent.size(); count++) {
