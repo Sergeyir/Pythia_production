@@ -14,7 +14,6 @@ class Particles {
 	std::vector <unsigned int> p_centr, pbar_centr;
 	
 	std::array <const unsigned int, 6> centr_det{200, 85, 41, 17, 5, 2}; //centality ranges for CuAu200
-	//std::array <const unsigned int, 6> centr_det{200, 4, 3, 2, 1, 0}; //centality ranges for pp200
 	
 	public:
 	
