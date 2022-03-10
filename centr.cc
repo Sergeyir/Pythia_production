@@ -13,10 +13,9 @@ int main(const unsigned int argc, const char *num[]) {
 	std::array <const unsigned int, 6> centr_det = {200, 85, 41, 17, 5, 2}; //centality ranges for CuAu200	
 	std::array <const float, 14> pt_min = {0.0, 0.0, 1.4, 1.7, 1.9, 2.1, 2.3, 2.6, 2.9, 3.4, 4.0, 4.5, 5.0, 6.5};
 	std::array <const float, 14> pt_max = {8.0, 1.4, 1.7, 1.9, 2.1, 2.3, 2.6, 2.9, 3.4, 4.0, 4.5, 5.0, 6.5, 8.0};
-	std::array <double, 14> nkstars, nantikstars;
 
-	TH1F *nkstars_hist = new TH1F("nkstars", "nkstars", 14, 0, 14);
-	TH1F *nantikstars_hist = new TH1F("nantikstars", "nantikstars", 14, 0, 14);
+	TH2F *nkstars_hist = new TH1F("nkstars", "nkstars", 14, 0, 14, 5, 0, 5);
+	TH2F *nantikstars_hist = new TH1F("nantikstars", "nantikstars", 14, 0, 14, 5, 0, 5);
 
 	const long long unsigned int nEvents = 1e7;
 
@@ -36,12 +35,12 @@ int main(const unsigned int argc, const char *num[]) {
 	
 	Pythia pythia;
 	
-	//pythia.readString("Beams:idA = 1000290630");
-	//pythia.readString("Beams:idB = 1000791970");
+	pythia.readString("Beams:idA = 1000290630");
+	pythia.readString("Beams:idB = 1000791970");
 	
 	pythia.readString("Beams:eCM = 200.");
 	//pythia.readString("PhaseSpace:pTHatMin = 0.");
-	pythia.readString("HardQCD:all = on");
+	//pythia.readString("HardQCD:all = on");
 	
 	//pythia.readString("HeavyIon:SigFitDefPar = 9.82,1.69,0.29,0.0,0.0,0.0,0.0,0.0");
 	//pythia.readString("HeavyIon:SigFitNGen = 0");
@@ -55,17 +54,19 @@ int main(const unsigned int argc, const char *num[]) {
 	
 	ncharged_per_event_hist = new TH1D("ncharged", "ncharged", nbins, 0, nbins);
 	ncharged_per_event_hist_no_weight_i_said_you_bro_no_weight_at_all_believe_me_please_i_am_not_joking_can_you_trust_me_at_least_one_time_bro_please_can_you_believe_i_ve_got_ligma = new TH1D("nchargednw", "nchargednw", nbins, 0, nbins);
-	
+		
 	for (unsigned long int iEvent = 0; iEvent < nEvents; ++iEvent) {
 	
+		unsigned int ncharged = 0;
+		std::array <double, 14> nkstars, nantikstars;
+
 		if (iEvent % 10000 == 0) {
 			cout << "Events has passed: " << iEvent << endl;
 			//system("sensors");
 		}
 		if (!pythia.next()) continue;
 		
-		unsigned int ncharged = 0;
-		double weight = 0;
+		double weight = pythia.info.weight();
 
 	for (int ipart = 0; ipart < pythia.event.size(); ++ipart) {
 		
@@ -73,8 +74,6 @@ int main(const unsigned int argc, const char *num[]) {
 		int d2 = pythia.event[ipart].daughter2();
 		
 		if (abs(pythia.event[ipart].id()) == 313 && (((abs(pythia.event[d1].id()) == 211 && abs(pythia.event[d2].id()) == 321)) || (abs(pythia.event[d1].id()) == 321 && abs(pythia.event[d2].id())))) {
-
-			//cout << pythia.event[ipart].id() << " " << pythia.event[d1].id() << " " << pythia.event[d2].id() << endl;
 
 			for (int count = 0; count < pt_min.size(); count++) {
 			
@@ -89,19 +88,8 @@ int main(const unsigned int argc, const char *num[]) {
 
 			}
 
-		} 
-		
-			if (pythia.event[ipart].isFinal() && pythia.event[ipart].isCharged()) {
-			
-				double eta = pythia.event[ipart].eta();
-				if (eta < 3.1 && eta > 4) continue;
-				ncharged++;
-				
-				
 			}
-			
-		weight = pythia.info.weight();
-		
+				
 		ncharged_per_event_hist->Fill(ncharged);
 		ncharged_per_event_hist_no_weight_i_said_you_bro_no_weight_at_all_believe_me_please_i_am_not_joking_can_you_trust_me_at_least_one_time_bro_please_can_you_believe_i_ve_got_ligma->Fill(ncharged, weight);
 		
