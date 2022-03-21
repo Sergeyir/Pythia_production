@@ -22,10 +22,10 @@ class CComby: public Particles {
 		
 		std::array <std::string, 5> output_dir_names;
 		
-		std::array <const int, 3> pos_part_id{211, 321, 2212};
-		std::array <const int, 3> neg_part_id{-211, -321, -2212};
+		std::array <const int, 5> pos_part_id{211, 321, 2212, 11, 22};
+		std::array <const int, 5> neg_part_id{-211, -321, -2212, -11, 22};
 		
-		std::array <const std::string, 3> part_name{"Pi", "K", "P"};
+		std::array <const std::string, 5> part_name{"Pi", "K", "P", "e", "y"};
 	
 		std::vector <std::unique_ptr<TH2F>> fg_hists, bg_hists;
 		std::vector <unsigned int> pos_part_ch_id, neg_part_ch_id;
@@ -92,13 +92,13 @@ class CComby: public Particles {
 			
 			chnum++;
 			
-			for (int count = 0; count < 3; count++) {
+			for (int count = 0; count < part_name.size(); count++) {
 			
 				if (id1 == pos_part_id[count]) fg_hist_name.append(part_name[count]);
 			
 			}
 			
-			for (int count = 0; count < 3; count++) {
+			for (int count = 0; count < part_name.size(); count++) {
 			
 				if (id2 == pos_part_id[count]) fg_hist_name.append(part_name[count]);
 			
@@ -121,8 +121,6 @@ class CComby: public Particles {
 			bg_hists.resize(hists_size + centr_num);
 			
 			for (int count = 0; count < centr_num; count++) {
-				
-				std::cout << "bruh" << std::endl;
 				
 				fg_hists[hists_size+count].reset(new TH2F(fg_hist_name.c_str(), fg_hist_name.c_str(), 80, 0, 8, 4000, 0, 4));
 				bg_hists[hists_size+count].reset(new TH2F(bg_hist_name.c_str(), fg_hist_name.c_str(), 80, 0, 8, 4000, 0, 4));
@@ -171,7 +169,7 @@ class CComby: public Particles {
 	
 		}
 		
-		void Write() {
+		void Write(const int cc_size) {
 			
 			for (int ch_count = 0; ch_count < chnum; ch_count++) {
 			
@@ -184,7 +182,18 @@ class CComby: public Particles {
 				
 				}
 			}
+
+			for (int count = 0; count < centr_num; count++) {
 			
+				TH1D *pool_stat = new TH1D("PoolStatistics", "PoolStatistics", 10, 0, 10);
+				pool_stat->SetBinContent(1, pool_nevents[count]);
+				output->cd(output_dir_names[count].c_str());
+				
+				pool_stat->Write();
+				delete pool_stat;
+
+			}
+
 			output->Close();
 		}
 	

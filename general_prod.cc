@@ -32,9 +32,9 @@ int main(const unsigned int seed_num) {
 	
 	pythia.init();
 	
-	long unsigned int nEvents = 2500000;	//number of events
-	const int mix_num = 10;		//number of events to mix
-	const int cc_size = 100000;		//number of events to write after mixing
+	long unsigned int nEvents = 1e6;	//number of events
+	const int mix_num = 10;			//number of events to mix
+	const int cc_size = 5e4;		//number of events to write after mixing
 	bool check{true};
 	
 	std::cout << "Output files are located in /home/sergey/Root/Projects/data/pythia_production" << std::endl;
@@ -42,26 +42,6 @@ int main(const unsigned int seed_num) {
 	CComby *CC;
 	
 	unsigned int out_number = 0;
-	
-	std::array<const float, 13> pt_range = {0., 1.4, 1.7, 1.9, 2.1, 2.3, 2.6, 2.9, 3.4, 4.0, 4.5, 5.0, 6.5};
-	
-	std::array<TGraph*, 5> kstar_mult;
-	
-	for (int count = 0; count < kstar_mult.size(); count++) {
-	
-		kstar_mult[count] = new TGraph();
-		kstar_mult[count]->SetMarkerStyle(21);
-		kstar_mult[count]->SetMarkerColor(count);
-		
-	}
-	
-	kstar_mult[0]->SetName("0-20");
-	kstar_mult[1]->SetName("20-40");
-	kstar_mult[2]->SetName("40-60");
-	kstar_mult[3]->SetName("60-80");
-	kstar_mult[4]->SetName("80-93");
-	
-	std::array<std::array<unsigned int, 12>, 5> nkstars_centr;
 	
 	for (unsigned long int iEvent = 0; iEvent < nEvents; ++iEvent) {
 	
@@ -71,12 +51,25 @@ int main(const unsigned int seed_num) {
 			check = false;
 			
 			std::string name = "/home/sergey/Root/Projects/data/pythia_production/pythiaCuAu200_";
-			name += seed_num;
+			name += to_string(seed_num);
 			name.append("_");
 			name.append(to_string(out_number));
 			name.append(".root");
 			
-			CC->AddChannel(211, 321);
+			CC->AddChannel(211, 211);
+			CC->AddChannel(321, 211);
+			CC->AddChannel(321, 321);
+			CC->AddChannel(2212, 211);
+			CC->AddChannel(2212, 321);
+			CC->AddChannel(2212, 2212);
+
+			CC->AddChannel(211, 11);
+			CC->AddChannel(321, 11);
+			CC->AddChannel(2212, 11);
+
+			CC->AddChannel(11, 11);
+			CC->AddChannel(22, 22);
+			CC->AddChannel(22, 11);
 			
 			CC->SetOutput(name.c_str());
 			
@@ -86,24 +79,11 @@ int main(const unsigned int seed_num) {
 		
 		if (!pythia.next()) continue;
 		
-		std::array<unsigned int, 12> nkstars;
 		unsigned int ncharged = 0;
 		
 		for (int ipart = 0; ipart < pythia.event.size(); ++ipart) {
 			
-			int d1 = pythia.event[ipart].daughter1();
-			int d2 = pythia.event[ipart].daughter2();
-			
-			if (abs(pythia.event[ipart].id()) == 313 && ((abs(pythia.event[d1].id()) == 211 && abs(pythia.event[d2].id()) == 211))) {
-				for (int count = 0; count < pt_range.size() - 1; count++) {
-				
-					float pt = pythia.event[ipart].pT();
-					if (pt > pt_range[count] && pt < pt_range[count+1])  nkstars[count]++;
-			
-				}
-			}
-		
-			if (pythia.event[ipart].isFinal() && pythia.event[ipart].isCharged()) {
+			if (pythia.event[ipart].isFinal()) {
 			
 				double eta = pythia.event[ipart].eta();
 				
@@ -116,7 +96,7 @@ int main(const unsigned int seed_num) {
 				
 				id = pythia.event[ipart].id();
 				
-				if (abs(id) != 211 && abs(id) != 321 && abs(id) != 2212) continue; //pi, K, P
+				if (abs(id) != 211 && abs(id) != 321 && abs(id) != 2212 && abs(id) != 11 && id != 22) continue; //pi, K, P, e
 				
 				e = pythia.event[ipart].e();
 				px = pythia.event[ipart].px();
@@ -130,8 +110,6 @@ int main(const unsigned int seed_num) {
 		
 		const int centr = CC->SetCentrality(iEvent, ncharged);
 		
-		for (int pt_count = 0; pt_count < pt_range.size() - 1; pt_count++) {nkstars_centr[centr][pt_count] += nkstars[pt_count];}
-		
 		if (iEvent % mix_num == 0 && iEvent != 0 || iEvent == nEvents - 1) {
 			
 			CC->ProcessEvents();
@@ -139,7 +117,7 @@ int main(const unsigned int seed_num) {
 			if (iEvent % cc_size == 0) {
 				
 				cout << "The process is ready for " << static_cast<double>(iEvent)/nEvents*100 << " percent" << endl;
-				CC->Write();
+				CC->Write(cc_size);
 				
 				delete CC;
 				check = true;
@@ -149,30 +127,8 @@ int main(const unsigned int seed_num) {
 		}
 	}
 	
-	TFile *t = new TFile("KStar.root", "RECREATE");
-	
-	for (int count = 0; count < kstar_mult.size(); count++) {
-	
-		for (int pt_count = 0; pt_count < pt_range.size()-1; pt_count++) {
-		
-		kstar_mult[count]->AddPoint(pt_range[pt_count+1], nkstars_centr[count][pt_count]);
-		
-		}
-		
-	}
-	
-	TCanvas *c = new TCanvas("kstar_mult", "kstar_mult");
-	
-	for (int count = 0; count < kstar_mult.size(); count++) {kstar_mult[count]->Draw("EP+");};
-	
-	c->Print("CuAu200_KStar_out.png");
-	
 	pythia.stat();
-	
-	//system("echo 'pythia_production has ended calculations' | mail -s 'pythia_production' 'antsupov0124@gmail.com'");
-	//system("shutdown -r +120");
 	
 	return 0;
 	
 }
-

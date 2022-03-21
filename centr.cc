@@ -14,8 +14,8 @@ int main(const unsigned int argc, const char *num[]) {
 	std::array <const float, 14> pt_min = {0.0, 0.0, 1.4, 1.7, 1.9, 2.1, 2.3, 2.6, 2.9, 3.4, 4.0, 4.5, 5.0, 6.5};
 	std::array <const float, 14> pt_max = {8.0, 1.4, 1.7, 1.9, 2.1, 2.3, 2.6, 2.9, 3.4, 4.0, 4.5, 5.0, 6.5, 8.0};
 
-	TH2F *nkstars_hist = new TH1F("nkstars", "nkstars", 14, 0, 14, 5, 0, 5);
-	TH2F *nantikstars_hist = new TH1F("nantikstars", "nantikstars", 14, 0, 14, 5, 0, 5);
+	TH2F *nkstars_hist = new TH2F("nkstars", "nkstars", 14, 0, 14, 5, 0, 5);
+	TH2F *nantikstars_hist = new TH2F("nantikstars", "nantikstars", 14, 0, 14, 5, 0, 5);
 
 	const long long unsigned int nEvents = 1e7;
 

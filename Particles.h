@@ -13,6 +13,8 @@ class Particles {
 	std::vector <double> p_e, p_px, p_py, p_pz, pbar_e, pbar_px, pbar_py, pbar_pz;
 	std::vector <unsigned int> p_centr, pbar_centr;
 	
+	std::array <double, 5> pool_nevents = {0, 0, 0, 0, 0};
+	
 	std::array <const unsigned int, 6> centr_det{200, 85, 41, 17, 5, 2}; //centality ranges for CuAu200
 	
 	public:
@@ -47,7 +49,7 @@ class Particles {
 		
 	}
 	
-	int SetCentrality(const int iEvent, const int ncharged) {
+	int SetCentrality(unsigned const long long int iEvent, unsigned const long long int ncharged) {
 		
 		unsigned int centr = 4;
 		
@@ -56,6 +58,8 @@ class Particles {
 			if (ncharged > centr_det[count+1] && ncharged < centr_det[count]) centr = count;
 			
 		}
+		
+		pool_nevents[centr]++;
 		
 		for (unsigned int count = 0; count < p_iEvent.size(); count++) {
 		
