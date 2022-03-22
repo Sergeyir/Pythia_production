@@ -9,7 +9,7 @@
 
 using namespace Pythia8;
 
-int main(const unsigned int argc, const char *num[]) {
+int main(const unsigned int argc, const char *argv[]) {
 
 	//std::array <const unsigned int, 6> centr_det = {200, 85, 41, 17, 5, 2}; //centality ranges for CuAu200	
 	std::array <const unsigned int, 6> centr_det = {200, 0, 0, 0, 0, 0};
@@ -19,10 +19,19 @@ int main(const unsigned int argc, const char *num[]) {
 
 	std::string name = "/home/sergey/Root/Projects/pythia_production/output/pythiaPP200_centr_";
 
-	TH2F *nkstars_hist = new TH2F("nkstars", "nkstars", 14, 0, 14, 5, 0, 5);
-	TH2F *nantikstars_hist = new TH2F("nantikstars", "nantikstars", 14, 0, 14, 5, 0, 5);
+	TH1F *pt_ranges_hist = new TH1F("pt_ranges", "pt_ranges", pt_min.size(), 0, pt_min.size());
 
-	const long long unsigned int nEvents = 1e7;
+	for (int num = 0; num < pt_min.size(); num++) {
+	
+		pt_ranges_hist->SetBinContent(num+1, pt_min[num]);
+
+	}
+
+
+	TH2F *nkstars_hist = new TH2F("nkstars", "nkstars", pt_min.size(), 0, pt_min.size(), 5, 0, 5);
+	TH2F *nantikstars_hist = new TH2F("nantikstars", "nantikstars", pt_min.size(), 0, pt_min.size(), 5, 0, 5);
+
+	const long long unsigned int nEvents = 10e6;
 
 	std::array <double, 14> nkstars, nantikstars;
 		
@@ -34,10 +43,10 @@ int main(const unsigned int argc, const char *num[]) {
 	TH1D *ncharged_per_event_hist, *ncharged_per_event_hist_no_weight_i_said_you_bro_no_weight_at_all_believe_me_please_i_am_not_joking_can_you_trust_me_at_least_one_time_bro_please_can_you_believe_i_ve_got_ligma;
 	TFile *output;
 
-	std::cout << "This is the process " << num[1] << std::endl;
+	std::cout << "This is the process " << argv[1] << std::endl;
 	
 	std::string set_seed("Random:seed = ");
-	set_seed += num[1];
+	set_seed += argv[1];
 	
 	Pythia pythia;
 	
@@ -142,11 +151,13 @@ int main(const unsigned int argc, const char *num[]) {
 
 	std::cout << "Output file is located at /home/sergey/Root/Projects/pythia_production/output" << std::endl;
 	
-	name += num[1];
+	name += argv[1];
 	name.append("_");
 	name.append(".root");
 	
 	output = new TFile(name.c_str(), "RECREATE");
+
+	pt_ranges_hist->Write();
 	ncharged_per_event_hist->Write();
 	ncharged_per_event_hist_no_weight_i_said_you_bro_no_weight_at_all_believe_me_please_i_am_not_joking_can_you_trust_me_at_least_one_time_bro_please_can_you_believe_i_ve_got_ligma->Write();
 	nkstars_hist->Write();
