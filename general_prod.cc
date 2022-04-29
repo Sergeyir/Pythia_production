@@ -56,20 +56,8 @@ int main(const unsigned int seed_num) {
 			name.append(to_string(out_number));
 			name.append(".root");
 			
-			CC->AddChannel(211, 211);
 			CC->AddChannel(321, 211);
 			CC->AddChannel(321, 321);
-			CC->AddChannel(2212, 211);
-			CC->AddChannel(2212, 321);
-			CC->AddChannel(2212, 2212);
-
-			CC->AddChannel(211, 11);
-			CC->AddChannel(321, 11);
-			CC->AddChannel(2212, 11);
-
-			CC->AddChannel(11, 11);
-			CC->AddChannel(22, 22);
-			CC->AddChannel(22, 11);
 			
 			CC->SetOutput(name.c_str());
 			
